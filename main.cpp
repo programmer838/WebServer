@@ -23,12 +23,21 @@ public:
     thread_pool& operator=(const thread_pool&) = delete;  // Disable copy assignment operator
     thread_pool& operator=(const thread_pool&&) = delete; // Disable move assignment operator
 
+    template <typename Callable, typename... Args>
+    void push_task(Callable&& function, Args&&... args) { // Perfect forwarding
 
-    void push_task(std::function<void()> function) {
+         {
 
-         {                                                            
-            const std::scoped_lock<std::mutex> scoped_lock(mutex);    // Aquire mutex in block scope
-            task_queue.push(function);                             // Add task to task queue
+            /*
+                By using perfect forwarding with Callable and args we are able to efficiently bind a function to its arguments
+                whilst maintainig the semantics and details of the arguments (such as if we want to retain the type information)
+                and push them into the task queue. std::bind will essentially bind the function and its arguments and return a callable 
+                object which does not return anything (void) and does not take any placeholder arguments (arguments the user provides) since
+                these are provided through args when the bind is done. So in the end we get a callable object that is compatible with std::function(void()).
+            */
+
+            const std::scoped_lock scoped_lock(mutex);                                                    // Aquire mutex in block scope
+            task_queue.push(std::bind(std::forward<Callable>(function), std::forward<Args>(args)...));    // Add task to task queue
          }
                                                                   // At this point RAII lock has released mutex since we are out of block scope
          conditional_variable.notify_one();                       // Notify/wakeup thread that task is available
