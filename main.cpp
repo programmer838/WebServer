@@ -14,8 +14,8 @@
 class thread_pool {
 
 public:
-    thread_pool() : pool(std::make_unique<std::thread[]>(std::thread::hardware_concurrency())) 
-                  , stop_flag(false)
+    thread_pool() : pool(std::make_unique<std::thread[]>(std::thread::hardware_concurrency()))
+                  , stop(false)
     {
 
         /* 
@@ -23,14 +23,13 @@ public:
 
             1) Allocate memory for X threads, I decided to keep this to std::thread::hardware_concurrency() which returns the number of CPU cores
             2) Initialise and create threads, and pass each thread a instance of the thread_pool::do_work() function which will have an infinite loop
-            which will be used to allow it to keep doing tasks when they are available in the task queue (check the comments for do_work() for more
+            which will be used to allow it to keep working on tasks when they are available in the task queue (check the comments for do_work() for more
             details on it).
         */
 
         for (unsigned int i = 0; i < std::thread::hardware_concurrency(); i++) {
              pool.get()[i] = std::thread(&thread_pool::do_work, this); 
         }
-
     }
 
     thread_pool(const thread_pool& p) = delete;           // Disable copy constructor
@@ -69,13 +68,24 @@ private:
     std::unique_ptr<std::thread[]> pool;          
     std::condition_variable conditional_variable;
     std::mutex mutex;   
-    bool stop_flag;
+    bool stop;
 
     void do_work() {
 
-         while (stop_flag == false) {
+        std::function<void()> task;
 
-         }
+        while (stop == false) {
+            
+            {
+                std::unique_lock unique_lock(mutex);
+                conditional_variable.wait(unique_lock, [&](){return stop || !task_queue.empty();});
+                if (stop && task_queue.empty()) return;
+                task = std::move(task_queue.front());
+                task_queue.pop();
+            }
+
+            task();
+        }
     }
 };
 
