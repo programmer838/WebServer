@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include <atomic>
 #include <thread>
 #include <array>
 #include <queue>
@@ -14,7 +15,7 @@
 class thread_pool {
 
 public:
-    thread_pool(uint32_t threads) : number_of_threads(threads), stop(false)
+    thread_pool(uint32_t threads) : number_of_threads(threads), stop(false), tasks_processed(0)
     {
         pool = std::make_unique<std::thread[]>(number_of_threads);
 
@@ -59,6 +60,7 @@ private:
     std::condition_variable conditional_variable;
     std::mutex mutex;   
     std::atomic<bool> stop;
+    std::atomic<uint64_t> tasks_processed;
     uint32_t number_of_threads;
 
     void do_work() {
@@ -69,14 +71,24 @@ private:
             
             {
                 std::unique_lock unique_lock(mutex);
-                conditional_variable.wait(unique_lock, [&](){return stop || !task_queue.empty();});
-                if (stop && task_queue.empty()) return;
+                conditional_variable.wait(unique_lock, [&](){return stop || !task_queue.empty();}); // Handle spurious wakeups and wait if condition is false
+                if (stop && task_queue.empty()) return;                                                      // Upon termination only terminate after the remaining tasks have been handled
                 task = std::move(task_queue.front());
                 task_queue.pop();
             }
 
             task();
+            ++tasks_processed;
         }
+    }
+
+    inline unsigned long get_task_queue_size() { // Return size of current task queue for logging purposes
+        std::scoped_lock scoped_lock(mutex);
+        return task_queue.size();
+    }
+
+    uint64_t get_number_tasks_processed() { // Return total tasks processed for logging purposes
+        return tasks_processed;    
     }
 
     ~thread_pool() {
