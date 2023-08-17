@@ -5,6 +5,7 @@
 #include <memory>
 #include <atomic>
 #include <thread>
+#include <chrono>
 #include <array>
 #include <queue>
 #include <mutex>
@@ -15,8 +16,10 @@
 class thread_pool {
 
 public:
-    thread_pool(uint32_t threads) : number_of_threads(threads), tasks_processed(0), stop(false)
+    thread_pool(uint32_t threads = std::thread::hardware_concurrency()) : number_of_threads(threads), tasks_processed(0), stop(false)
     {
+        if (number_of_threads == 0) number_of_threads = 1; // Check if either the user gives 0 or if hardware_concurrency() returns 0
+
         pool = std::make_unique<std::thread[]>(number_of_threads);
 
         for (unsigned int i = 0; i < number_of_threads; i++) {
@@ -63,6 +66,14 @@ public:
         return tasks_processed;    
     }
 
+    ~thread_pool() {
+        destroy_thread_pool();
+        std::cout << "----------------------------------------------\n"
+                  << "Number of tasks processed by thread pool: " << tasks_processed << '\n'
+                  << "Number of threads created by thread pool: " << number_of_threads << '\n'
+                  << "----------------------------------------------\n";
+    }
+
 private:
     std::queue<std::function<void()>> task_queue; 
     std::unique_ptr<std::thread[]> pool;          
@@ -76,12 +87,12 @@ private:
 
         std::function<void()> task;
 
-        while (stop == false) {
+        while (true) {
             
             {
                 std::unique_lock unique_lock(mutex);
                 conditional_variable.wait(unique_lock, [&](){return stop || !task_queue.empty();}); // Handle spurious wakeups and wait if condition is false
-                if (stop && task_queue.empty()) return;                                                      // Upon termination only terminate after the remaining tasks have been handled
+                if (stop && task_queue.empty()) break;                                                      // Upon termination only terminate after the remaining tasks have been handled
                 task = std::move(task_queue.front());
                 task_queue.pop();
             }
@@ -90,16 +101,40 @@ private:
             ++tasks_processed;
         }
     }
-
-    ~thread_pool() {
-        destroy_thread_pool();
-    }
 };
+
+void f1() {
+    std::cout << "Hello from function 1\n";
+}
+
+void f2() {
+    std::cout << "Hello from function 2\n";
+}
+
+void f3() {
+    std::cout << "Hello from function 3\n";
+}
+
+void f4() {
+    std::cout << "Hello from function 4\n";
+}
+
+void f5() {
+    std::cout << "Hello from function 5\n";
+}
 
 int main(int argc, char **argv)
 {
     struct io_uring ring;
     io_uring_queue_init(10, &ring, 0);
+
+    thread_pool pool;
+    pool.push_task(f1);
+    pool.push_task(f2);
+    pool.push_task(f3);
+    pool.push_task(f4);
+    pool.push_task(f5);
+    pool.push_task(f2);
 
     return 0;
 }

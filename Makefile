@@ -1,7 +1,7 @@
 # Compiler settings
-CXX = g++
-CXXFLAGS = -std=c++20 -Wall -Werror
-LDFLAGS = -luring
+CXX = clang++
+CXXFLAGS = -std=c++20 -stdlib=libc++ -Wall -Werror
+LDFLAGS = -luring -lpthread
 
 # Source files and target executable name
 SRCS = main.cpp
@@ -14,4 +14,3 @@ $(TARGET): $(SRCS)
 
 clean:
 	rm -f $(TARGET)
-
