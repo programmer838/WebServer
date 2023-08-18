@@ -45,3 +45,8 @@ Web servers constitute the bedrock of the internet, delivering content to client
 - Use fixed size objects instead of dynamic ones, this avoids memory allocation and resizing overhead
 - Reuse memory, create memory pool so memory can be reused and recycled
 - Use move semantics over copying data
+- 
+
+# Rules of performance 
+- Never guess about performance
+- Only measure what is relevant
