@@ -34,4 +34,14 @@ Web servers constitute the bedrock of the internet, delivering content to client
 
 - Comprehensive documentation including server design, key features, explanation behind implementation choices, potential bottlenecks, and clear instructions for setup, use and troubleshooting. 
 
-- Rigorous testing and performance analysis reports, detailing the server's behaviour under different loads, error conditions, and comparison with a single-threaded server. These reports should include measures of response time, throughput, and resource usage, among other metrics. 
+- Rigorous testing and performance analysis reports, detailing the server's behaviour under different loads, error conditions, and comparison with a single-threaded server. These reports should include measures of response time, throughput, and resource usage, among other metrics.
+
+
+
+
+# Thread pool notes
+
+- Avoid Allocation and Deallocation of objects, this can be quite costly
+- Use fixed size objects instead of dynamic ones, this avoids memory allocation and resizing overhead
+- Reuse memory, create memory pool so memory can be reused and recycled
+
