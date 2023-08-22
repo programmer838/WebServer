@@ -1,3 +1,0 @@
-#!/bin/bash
-clang++ -std=c++20 -O3 -pthread tp_bench.cpp thread_pool.cpp -lbenchmark -lpthread -o benchmark_program
-./benchmark_program --benchmark_repetitions=10
