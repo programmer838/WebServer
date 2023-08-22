@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <utility>
 #include <cstddef>
 #include <stdexcept>
 
@@ -8,14 +9,46 @@ template <typename T>
 class ring_buffer {
 
 public:
+    std::unique_ptr<T[]> queue;  
+    std::size_t size, count, head, tail;
+
     ring_buffer(std::size_t k) : size(k), count(0), head(0), tail(-1) {
         queue = std::make_unique<T[]>(k);
     }
+ 
+    ring_buffer(ring_buffer&& p) noexcept {                        // Move constructor
+	
+	this->queue = std::move(p.queue);
+	this->size  = p.size;
+	this->count = p.count;
+	this->head  = p.head;
+        this->tail  = p.tail;
 
-    thread_pool(const thread_pool& p) = delete;           // Disable copy constructor
-    thread_pool(thread_pool&& p) = delete;                // Disable move constructor
-    thread_pool& operator=(const thread_pool&) = delete;  // Disable copy assignment operator
-    thread_pool& operator=(const thread_pool&&) = delete; // Disable move assignment operator
+	p.size  = 0;
+        p.count = 0;
+        p.head  = 0;
+        p.tail  = 0;	     
+    }
+
+    ring_buffer& operator=(ring_buffer&& p) noexcept {         // Move assignment operator
+    	if (this == &p) return *this;
+
+	this->queue = std::move(p.queue);
+        this->size  = p.size;
+        this->count = p.count;
+        this->head  = p.head;
+        this->tail  = p.tail;
+
+        p.size  = 0;
+        p.count = 0;
+        p.head  = 0;
+        p.tail  = 0;
+
+	return *this;
+    }
+
+    ring_buffer(const ring_buffer& p) = delete;           // Disable copy constructor
+    ring_buffer& operator=(const ring_buffer&) = delete;  // Disable copy assignment operator
 
     bool push(T value) {
          
@@ -59,8 +92,4 @@ public:
     bool full() {
          return count == size ? true : false;
     }
-
-private:
-       std::unique_ptr<T[]> queue;  
-       std::size_t size, count, head, tail;
 };
