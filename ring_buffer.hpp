@@ -17,9 +17,9 @@ public:
     thread_pool& operator=(const thread_pool&) = delete;  // Disable copy assignment operator
     thread_pool& operator=(const thread_pool&&) = delete; // Disable move assignment operator
 
-    bool enQueue(T value) {
+    bool push(T value) {
          
-         if (isFull())
+         if (full())
              return false;
         
          tail = (tail + 1) % size;
@@ -29,9 +29,9 @@ public:
          return true;
     }
     
-    bool deQueue() {
+    bool pop() {
         
-         if (isEmpty())
+         if (empty())
              return false;
 
          head = (head + 1) % size;
@@ -40,23 +40,23 @@ public:
          return true;
     }
     
-    T Front() {
-        if (isEmpty())
+    T front() {
+        if (empty())
 	    throw std::runtime_error("ring_buffer Runtime Error: failed to retrieve Front() because buffer is empty.\n"); 
 	return queue[head];
     }
     
-    T Rear() {
-        if (isEmpty()) 
+    T rear() {
+        if (empty()) 
 	    throw std::runtime_error("ring_buffer Runtime Error: failed to retrieve Rear() because buffer is empty.\n"); 
         return queue[tail];
     }
     
-    bool isEmpty() {
+    bool empty() {
          return count == 0 ? true : false;
     }
     
-    bool isFull() {
+    bool full() {
          return count == size ? true : false;
     }
 
