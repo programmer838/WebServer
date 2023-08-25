@@ -44,13 +44,12 @@ int main(int argc, char **argv)
     struct io_uring ring;
     io_uring_queue_init(10, &ring, 0);
 
-    thread_pool pool(2);
+    thread_pool pool(6);
     pool.push_task(f1);
     pool.push_task(f2);
     pool.push_task(f3);
     pool.push_task(f4);
     pool.push_task(f5);
     pool.push_task(f2);
-
     return 0;
 }

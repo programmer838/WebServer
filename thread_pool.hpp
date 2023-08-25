@@ -10,10 +10,12 @@
 #include <queue>
 #include <mutex>
 
+#include "ring_buffer.hpp"
+
 class thread_pool {
 
 public:
-    thread_pool(uint32_t threads = std::thread::hardware_concurrency());
+    thread_pool(uint32_t threads = std::thread::hardware_concurrency(), uint32_t task_pool_size = std::thread::hardware_concurrency());
 
     thread_pool(const thread_pool& p) = delete;           // Disable copy constructor
     thread_pool(thread_pool&& p) = delete;                // Disable move constructor
@@ -40,7 +42,7 @@ public:
     ~thread_pool();
 
 private:
-    std::queue<std::function<void()>> task_queue; 
+    ring_buffer<std::function<void()>> task_queue; 
     std::unique_ptr<std::thread[]> pool;          
     std::condition_variable conditional_variable;
     std::mutex mutex;   

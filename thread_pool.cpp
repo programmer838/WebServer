@@ -1,9 +1,10 @@
 #include "thread_pool.hpp"
 
-thread_pool::thread_pool(uint32_t threads) 
-            : number_of_threads(threads), 
-                tasks_processed(0), 
-                stop(false)
+thread_pool::thread_pool(uint32_t threads, uint32_t task_pool_size) 
+            : task_queue(task_pool_size),
+              number_of_threads(threads), 
+              tasks_processed(0), 
+              stop(false)
 {
     if (number_of_threads == 0) number_of_threads = 1; // Check if either the user gives 0 or if hardware_concurrency() returns 0
 

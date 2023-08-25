@@ -1,30 +1,34 @@
 #pragma once
 
 #include <memory>
+#include <mutex>
 #include <utility>
-#include <cstddef>
 #include <stdexcept>
 
 template <typename T>
 class ring_buffer {
 
 public:
-    std::unique_ptr<T[]> queue;  
-    std::size_t size, count, head, tail;
-
-    ring_buffer(std::size_t k) : size(k), count(0), head(0), tail(-1) {
-        queue = std::make_unique<T[]>(k);
+    T *queue;  
+    int ssize; 
+    int count;
+    int head;
+    int tail;
+    
+    ring_buffer(int k) : ssize(k), count(0), head(0), tail(-1) {
+        queue = new T[k];
     }
  
     ring_buffer(ring_buffer&& p) noexcept {                        // Move constructor
 	
 	this->queue = std::move(p.queue);
-	this->size  = p.size;
+	this->ssize  = p.ssize;
 	this->count = p.count;
 	this->head  = p.head;
         this->tail  = p.tail;
 
-	p.size  = 0;
+	p.queue = nullptr;
+	p.ssize  = 0;
         p.count = 0;
         p.head  = 0;
         p.tail  = 0;	     
@@ -34,12 +38,13 @@ public:
     	if (this == &p) return *this;
 
 	this->queue = std::move(p.queue);
-        this->size  = p.size;
+        this->ssize  = p.ssize;
         this->count = p.count;
         this->head  = p.head;
         this->tail  = p.tail;
-
-        p.size  = 0;
+	
+	p.queue = nullptr;
+        p.ssize  = 0;
         p.count = 0;
         p.head  = 0;
         p.tail  = 0;
@@ -52,10 +57,10 @@ public:
 
     bool push(T value) {
          
-         if (full())
+         if (count == ssize)
              return false;
         
-         tail = (tail + 1) % size;
+         tail = (tail + 1) % ssize;
          queue[tail] = value;
          count++;
 
@@ -64,32 +69,30 @@ public:
     
     bool pop() {
         
-         if (empty())
+         if (count == 0)
              return false;
 
-         head = (head + 1) % size;
+         head = (head + 1) % ssize;
          count--;
          
          return true;
     }
-    
-    T front() {
-        if (empty())
+
+    T& front() {
+        if (count == 0)
 	    throw std::runtime_error("ring_buffer Runtime Error: failed to retrieve Front() because buffer is empty.\n"); 
 	return queue[head];
     }
-    
-    T rear() {
-        if (empty()) 
-	    throw std::runtime_error("ring_buffer Runtime Error: failed to retrieve Rear() because buffer is empty.\n"); 
-        return queue[tail];
-    }
-    
+
     bool empty() {
-         return count == 0 ? true : false;
+         return count == 0;
     }
-    
-    bool full() {
-         return count == size ? true : false;
+
+    int size() {
+	return count;
+    }
+   
+    ~ring_buffer() {
+	delete[] queue;
     }
 };
