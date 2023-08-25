@@ -1,1 +1,5 @@
-
+#!/bin/bash
+clang++ -std=c++20 -O3 ring_buffer_bench.cpp -o ring_bench
+clang++ -std=c++20 -O3 std_queue_bench.cpp -o queue_bench
+./ring_bench
+./queue_bench
