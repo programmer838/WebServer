@@ -44,12 +44,22 @@ int main(int argc, char **argv)
     struct io_uring ring;
     io_uring_queue_init(10, &ring, 0);
 
-    thread_pool pool(6);
-    pool.push_task(f1);
-    pool.push_task(f2);
-    pool.push_task(f3);
-    pool.push_task(f4);
-    pool.push_task(f5);
-    pool.push_task(f2);
+    thread_pool pool(6,1);
+
+    auto start_time = std::chrono::high_resolution_clock::now();
+    while(!pool.push_task(f1));
+    while(!pool.push_task(f2));
+    while(!pool.push_task(f3));
+    while(!pool.push_task(f4));
+    while(!pool.push_task(f5));
+    while(!pool.push_task(f2));
+
+
+    pool.destroy_thread_pool(); // Make sure to join the threads to wait for them to finish
+
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();
+
+    std::cout << "Time taken: " << duration << " nanoseconds" << std::endl;
     return 0;
 }

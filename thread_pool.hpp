@@ -23,14 +23,18 @@ public:
     thread_pool& operator=(const thread_pool&&) = delete; // Disable move assignment operator
 
     template <typename Callable, typename... Args>
-    void push_task(Callable&& function, Args&&... args) { // Perfect forwarding
+    bool push_task(Callable&& function, Args&&... args) { // Perfect forwarding
+
+	    bool ret;		
 
             {
-                 std::scoped_lock scoped_lock(mutex);                  // Aquire mutex in block scope
-                 task_queue.push(std::bind(std::forward<Callable>(function), std::forward<Args>(args)...));  // Add task to task queue
-            }
+                 mutex.lock();
+                 ret = task_queue.push(std::bind(std::forward<Callable>(function), std::forward<Args>(args)...));  // Add task to task queue
+            	 mutex.unlock();
+	    }
                                                                     // At this point RAII lock has released mutex since we are out of block scope
             conditional_variable.notify_one();                       // Notify/wakeup thread that task is available
+	    return ret;	    
     }
 
     void destroy_thread_pool();

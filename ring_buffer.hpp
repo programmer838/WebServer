@@ -55,7 +55,7 @@ public:
     ring_buffer(const ring_buffer& p) = delete;           // Disable copy constructor
     ring_buffer& operator=(const ring_buffer&) = delete;  // Disable copy assignment operator
 
-    bool push(T value) {
+    bool push(T value) noexcept {
          
          if (count == ssize)
              return false;
@@ -67,7 +67,7 @@ public:
          return true;
     }
     
-    bool pop() {
+    bool pop() noexcept {
         
          if (count == 0)
              return false;
@@ -78,17 +78,17 @@ public:
          return true;
     }
 
-    T& front() {
+    T& front() const {
         if (count == 0)
 	    throw std::runtime_error("ring_buffer Runtime Error: failed to retrieve Front() because buffer is empty.\n"); 
 	return queue[head];
     }
 
-    bool empty() {
+    bool empty() const noexcept {
          return count == 0;
     }
 
-    int size() {
+    int size() const noexcept {
 	return count;
     }
    
