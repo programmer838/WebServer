@@ -1,10 +1,10 @@
 # Compiler settings
 CXX = clang++
-CXXFLAGS = -std=c++20 -stdlib=libc++ -Wall -Werror
+CXXFLAGS = -std=c++20 -stdlib=libc++ -Wall -Werror -Wpessimizing-move -Wredundant-move
 LDFLAGS = -luring -lpthread
 
 # Source files and target executable name
-SRCS = main.cpp thread_pool.cpp
+SRCS = main.cpp 
 TARGET = my_program
 
 all: $(TARGET)
