@@ -47,7 +47,7 @@ Web servers constitute the bedrock of the internet, delivering content to client
 - Use move semantics over copying data
 - Cache Line optimisations (https://www.youtube.com/watch?v=WDIkqP4JbkE)
 - PGO and WPO compiler options/flags
-- ring buffer size should be power of 2, to allow use of bitwise `&` over modulo `%`
+- Ring buffer size should be power of 2, to allow use of bitwise `&` over modulo `%`
 
 # Rules of performance 
 - Never guess about performance
