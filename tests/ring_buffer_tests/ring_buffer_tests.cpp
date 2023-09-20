@@ -4,7 +4,6 @@
 #include "inplace_function.h"
 
 #include <catch2/catch.hpp>
-#include <functional>
 
 TEST_CASE("Test single push and single pop") {
 
