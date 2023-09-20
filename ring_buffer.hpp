@@ -33,12 +33,10 @@ public:
 		    } 
 		}
 		else if (current_sequence_number < expected) {
-		    std::cout << "full\n";
 		    return;
 		}
 	 }
 	
-	 std::cout << "pushed to: " << expected << '\n';
  	 queue[expected & (ring_buffer_size-1)].data = std::move(value);
 	 queue[expected & (ring_buffer_size-1)].sequence_number++;
     }
@@ -57,12 +55,10 @@ public:
 		    }	
 		}
 		else if (expected == current_sequence_number) {
-		    std::cout << "empty\n";
 		    return false;
 		}
 	 }
 
-	 std::cout << "popped from: " << expected << '\n';
          auto task = std::move(queue[expected & (ring_buffer_size-1)].data);
 	 task();
 	 queue[expected & (ring_buffer_size-1)].sequence_number.store(expected+ring_buffer_size, std::memory_order_relaxed);
