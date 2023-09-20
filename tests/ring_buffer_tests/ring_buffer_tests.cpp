@@ -1,8 +1,10 @@
 #define CATCH_CONFIG_MAIN
-#include <catch2/catch.hpp>
+
 #include "ring_buffer.hpp"
-#include <functional>
 #include "inplace_function.h"
+
+#include <catch2/catch.hpp>
+#include <functional>
 
 TEST_CASE("Test single push and single pop") {
 
