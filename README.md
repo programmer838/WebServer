@@ -1,4 +1,4 @@
-CS3821 — BSc Final Year Project 
+CS3821 — BSc Final Year Project (Project In Progress)
 ===============================================
 Design and Implementation of a Multithreaded Web Server
 ===============================================
